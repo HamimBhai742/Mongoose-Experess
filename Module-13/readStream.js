@@ -12,6 +12,8 @@ readStream.on('data', (data) => {
   });
 });
 
+
+
 readStream.on('error', (err) => {
   throw new Error('readerror', err);
 });
