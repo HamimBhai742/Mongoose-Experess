@@ -1,11 +1,28 @@
 import { model, Schema } from 'mongoose';
-import { IUser } from '../interfaces/user.interface';
+import {
+  IAddress,
+  IUser,
+  UserMethods,
+  UserStatic,
+} from '../interfaces/user.interface';
+import { Model } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
-const userSchema = new Schema<IUser>(
+const addressSchema = new Schema<IAddress>(
+  {
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    country: { type: String, required: true },
+    zip: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const userSchema = new Schema<IUser, UserStatic, UserMethods>(
   {
     firstName: {
       type: String,
-      required: true,
+      required: [true, 'First name is required'],
       trim: true,
       minlength: [5, 'First name must be at least 5 characters long'],
       maxlength: [10, 'First name must be at most 10 characters long'],
@@ -18,7 +35,7 @@ const userSchema = new Schema<IUser>(
     },
     age: {
       type: Number,
-      required: true,
+      required: [true, 'Age is required'],
       min: [18, 'Age must be at least 18 years old'],
       max: [40, 'Age must be at most 40 years old'],
     },
@@ -58,6 +75,9 @@ const userSchema = new Schema<IUser>(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    address: {
+      type: addressSchema,
+    },
   },
   {
     versionKey: false,
@@ -65,4 +85,18 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-export const User = model('User', userSchema);
+// const hasPasswordSchema = new Schema({
+//   password: String,
+// });
+userSchema.method('hasPassword', async function (password: string) {
+  const pass = await bcrypt.hash(password, 10);
+  return pass;
+});
+
+userSchema.static('hashPassword', async function (password: string) {
+  console.log(password)
+  const pass = await bcrypt.hash(password, 10);
+  return pass;
+});
+
+export const User = model<IUser,UserStatic>('User', userSchema);

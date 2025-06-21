@@ -11,7 +11,7 @@ router.post('/create-note', async (req:Request, res:Response) => {
 
 //get all notes
 router.get('/', async (req:Request, res:Response) => {
-  const notes = await Notes.find();
+  const notes = await Notes.find().populate('user');
   res.json(notes);
 });
 
